@@ -39,8 +39,7 @@ bool outlet_get_is_state_changed(int index);
 esp_err_t outlet_set_is_state_changed(int index, bool is_state_changed);
 void outlet_parse_from_json(const char *json, DEVICE_TWIN_STATE update_state);
 
-void outlet_add_default_message(int outlet_index);
-void outlet_add_message(const char *text);
+void outlet_add_message(int outlet_index);
 char *outlet_get_message(void);
 char *make_outlet_report(int index);
 

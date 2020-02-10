@@ -206,11 +206,12 @@ void outlet_parse_from_json(const char *json, DEVICE_TWIN_STATE update_state) {
   }
   json_value_free(root_value);
 }
-void outlet_add_default_message(int outlet_index) {
+void outlet_add_message(int outlet_index) {
   JSON_Value *root_value = json_value_init_object();
   JSON_Object *root_object = json_value_get_object(root_value);
   char number[3];
   snprintf(number, sizeof(number), "%d", outlet_index);
+  json_object_set_string(root_object, "messageType", "outlet");
   json_object_set_string(root_object, "sensorName", number);
   json_object_set_string(root_object, "parentName", "outlet");
   json_object_set_boolean(root_object, "sensorState",
