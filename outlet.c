@@ -4,30 +4,25 @@
 
 #include "outlet.h"
 
-#include "parson.h"
-
 #define OUTLET_ON 1
 #define OUTLET_OFF 0
 
 #define TIME_MAX 2147483647
-static const char* TAG = "outlet";
-static Outlet* outlets = NULL;
+static const char *TAG = "outlet";
+static Outlet *outlets = NULL;
 static size_t outlet_num = 0;
-static OutletMessageQueue* queue = NULL;
 
 bool outlet_get_outlet(int index);
 esp_err_t outlet_set_is_state_changed(int index, bool is_state_changed);
 esp_err_t outlet_set_outlet(int index, bool is_on);
 
 esp_err_t outlet_init(gpio_num_t gpios[], size_t num) {
-  if (num <= 0) return ESP_ERR_INVALID_SIZE;
+  if (num <= 0)
+    return ESP_ERR_INVALID_SIZE;
   // initialize queue
-  queue = (OutletMessageQueue*)malloc(sizeof(OutletMessageQueue));
-  queue->front = queue->rear = NULL;
-  queue->count = 0;
 
   outlet_num = num;
-  outlets = (Outlet*)malloc(sizeof(Outlet) * outlet_num);
+  outlets = (Outlet *)malloc(sizeof(Outlet) * outlet_num);
   for (int i = 0; i < outlet_num; i++) {
     outlets[i].pin = gpios[i];
     outlets[i].is_timer_on = false;
@@ -47,7 +42,7 @@ esp_err_t outlet_set_outlet(int index, bool is_on) {
     ESP_LOGE(TAG, "Index is Invaild. size : %d index: %d", outlet_num, index);
     return ESP_ERR_INVALID_ARG;
   }
-  Outlet* outlet = &(outlets[index]);
+  Outlet *outlet = &(outlets[index]);
   if (gpio_get_level(outlet->pin) != (int)is_on) {
     outlet_set_is_state_changed(index, true);
   }
@@ -65,7 +60,7 @@ bool outlet_get_outlet(int index) {
     ESP_LOGE(TAG, "Index is Invaild. size : %d index: %d", outlet_num, index);
     return false;
   }
-  Outlet* outlet = &(outlets[index]);
+  Outlet *outlet = &(outlets[index]);
   return (bool)gpio_get_level(outlet->pin);
 }
 
@@ -74,7 +69,7 @@ bool outlet_get_is_state_changed(int index) {
     ESP_LOGE(TAG, "Index is Invaild. size : %d index: %d", outlet_num, index);
     return false;
   }
-  Outlet* outlet = &(outlets[index]);
+  Outlet *outlet = &(outlets[index]);
   return outlet->is_state_changed;
 }
 
@@ -83,7 +78,7 @@ esp_err_t outlet_set_is_state_changed(int index, bool is_state_changed) {
     ESP_LOGE(TAG, "Index is Invaild. size : %d index: %d", outlet_num, index);
     return ESP_ERR_INVALID_ARG;
   }
-  Outlet* outlet = &(outlets[index]);
+  Outlet *outlet = &(outlets[index]);
   outlet->is_state_changed = is_state_changed;
   return ESP_OK;
 }
@@ -93,7 +88,7 @@ bool outlet_get_is_timer_on(int index) {
     ESP_LOGE(TAG, "Index is Invaild. size : %d index: %d", outlet_num, index);
     return false;
   }
-  Outlet* outlet = &(outlets[index]);
+  Outlet *outlet = &(outlets[index]);
   return outlet->is_timer_on;
 }
 
@@ -102,7 +97,7 @@ esp_err_t outlet_set_is_timer_on(int index, bool is_timer_on) {
     ESP_LOGE(TAG, "Index is Invaild. size : %d index: %d", outlet_num, index);
     return ESP_ERR_INVALID_ARG;
   }
-  Outlet* outlet = &(outlets[index]);
+  Outlet *outlet = &(outlets[index]);
   outlet->is_timer_on = is_timer_on;
   return ESP_OK;
 }
@@ -112,7 +107,7 @@ time_t outlet_get_last_time_turn_on(int index) {
     ESP_LOGE(TAG, "Index is Invaild. size : %d index: %d", outlet_num, index);
     return TIME_MAX;
   }
-  Outlet* outlet = &(outlets[index]);
+  Outlet *outlet = &(outlets[index]);
   return outlet->last_time_turn_on;
 }
 esp_err_t outlet_set_last_time_turn_on(int index, time_t last_time_turn_on) {
@@ -120,7 +115,7 @@ esp_err_t outlet_set_last_time_turn_on(int index, time_t last_time_turn_on) {
     ESP_LOGE(TAG, "Index is Invaild. size : %d index: %d", outlet_num, index);
     return ESP_ERR_INVALID_ARG;
   }
-  Outlet* outlet = &(outlets[index]);
+  Outlet *outlet = &(outlets[index]);
   outlet->last_time_turn_on = last_time_turn_on;
   return ESP_OK;
 }
@@ -130,7 +125,7 @@ time_t outlet_get_timer_interval(int index) {
     ESP_LOGE(TAG, "Index is Invaild. size : %d index: %d", outlet_num, index);
     return TIME_MAX;
   }
-  Outlet* outlet = &(outlets[index]);
+  Outlet *outlet = &(outlets[index]);
   return outlet->timer_interval;
 }
 esp_err_t outlet_set_timer_interval(int index, time_t timer_interval) {
@@ -138,7 +133,7 @@ esp_err_t outlet_set_timer_interval(int index, time_t timer_interval) {
     ESP_LOGE(TAG, "Index is Invaild. size : %d index: %d", outlet_num, index);
     return ESP_ERR_INVALID_ARG;
   }
-  Outlet* outlet = &(outlets[index]);
+  Outlet *outlet = &(outlets[index]);
   outlet->timer_interval = timer_interval;
   return ESP_OK;
 }
@@ -147,7 +142,7 @@ time_t outlet_get_on_off_interval(int index) {
     ESP_LOGE(TAG, "Index is Invaild. size : %d index: %d", outlet_num, index);
     return TIME_MAX;
   }
-  Outlet* outlet = &(outlets[index]);
+  Outlet *outlet = &(outlets[index]);
   return outlet->on_off_interval;
 }
 esp_err_t outlet_set_on_off_interval(int index, time_t on_off_interval) {
@@ -155,14 +150,14 @@ esp_err_t outlet_set_on_off_interval(int index, time_t on_off_interval) {
     ESP_LOGE(TAG, "Index is Invaild. size : %d index: %d", outlet_num, index);
     return ESP_ERR_INVALID_ARG;
   }
-  Outlet* outlet = &(outlets[index]);
+  Outlet *outlet = &(outlets[index]);
   outlet->on_off_interval = on_off_interval;
   return ESP_OK;
 }
 
-void outlet_parse_from_json(const char* json, DEVICE_TWIN_STATE update_state) {
-  JSON_Value* root_value = json_parse_string(json);
-  JSON_Object* root_object = json_value_get_object(root_value);
+void outlet_parse_from_json(const char *json, DEVICE_TWIN_STATE update_state) {
+  JSON_Value *root_value = json_parse_string(json);
+  JSON_Object *root_object = json_value_get_object(root_value);
   for (int i = 0; i < outlet_num; i++) {
     char auto_outlet_property[30];
     if (update_state == UPDATE_PARTIAL) {
@@ -172,7 +167,7 @@ void outlet_parse_from_json(const char* json, DEVICE_TWIN_STATE update_state) {
       snprintf(auto_outlet_property, sizeof(auto_outlet_property),
                "desired.autoOutlet.%d", i);
     }
-    JSON_Object* json_auto_outlet =
+    JSON_Object *json_auto_outlet =
         json_object_dotget_object(root_object, auto_outlet_property);
     if (json_object_get_value(json_auto_outlet, "timer") != NULL) {
       bool is_timer_on = json_object_get_boolean(json_auto_outlet, "timer");
@@ -198,12 +193,13 @@ void outlet_parse_from_json(const char* json, DEVICE_TWIN_STATE update_state) {
     }
   }
   for (int i = 0; i < outlet_num; i++) {
-    JSON_Value* outlet_state;
+    JSON_Value *outlet_state;
     char outlet_property[12];
     if (update_state == UPDATE_PARTIAL) {
       snprintf(outlet_property, sizeof(outlet_property), "outlet.%d", i);
       outlet_state = json_object_dotget_value(root_object, outlet_property);
-      if (outlet_state == NULL) continue;
+      if (outlet_state == NULL)
+        continue;
       bool state = (bool)json_value_get_boolean(outlet_state);
       outlet_set_outlet(i, state);
     }
@@ -211,58 +207,33 @@ void outlet_parse_from_json(const char* json, DEVICE_TWIN_STATE update_state) {
   json_value_free(root_value);
 }
 void outlet_add_default_message(int outlet_index) {
-  JSON_Value* root_value = json_value_init_object();
-  JSON_Object* root_object = json_value_get_object(root_value);
+  JSON_Value *root_value = json_value_init_object();
+  JSON_Object *root_object = json_value_get_object(root_value);
   char number[3];
   snprintf(number, sizeof(number), "%d", outlet_index);
   json_object_set_string(root_object, "sensorName", number);
   json_object_set_string(root_object, "parentName", "outlet");
   json_object_set_boolean(root_object, "sensorState",
                           outlet_get_outlet(outlet_index));
-  char* result = json_serialize_to_string(root_value);
-  outlet_add_message(result);
+  char *result = json_serialize_to_string(root_value);
+  queue_message_add_message(result);
   json_value_free(root_value);
   free(result);
 }
-void outlet_add_message(const char* text) {
-  OutletMessage* new_message = (OutletMessage*)malloc(sizeof(OutletMessage));
-  new_message->next = NULL;
-  new_message->text = (char*)malloc(sizeof(char) * (strlen(text) + 1));
-  strncpy(new_message->text, text, strlen(text) + 1);
-  if (queue->count == 0) {
-    queue->front = new_message;
-  } else {
-    queue->rear->next = new_message;
-  }
-  queue->rear = new_message;
-  queue->count++;
-}
 
-char* outlet_get_message(void) {
-  if (queue->count == 0) return NULL;
-  OutletMessage* new_message = queue->front;
-  char* text = (char*)malloc(sizeof(char) * (strlen(new_message->text) + 1));
-  strncpy(text, new_message->text, strlen(new_message->text) + 1);
-  queue->front = new_message->next;
-  free(new_message->text);
-  free(new_message);
-  queue->count--;
-  return text;
-}
-
-char* make_outlet_report(int index) {
+char *make_outlet_report(int index) {
   if (index < 0 || outlet_num <= index) {
     ESP_LOGE(TAG, "Index is Invaild. size : %d index: %d", outlet_num, index);
     return NULL;
   }
-  char* result;
+  char *result;
   char outlet_property[20];
   char auto_outlet_property[40];
   snprintf(outlet_property, sizeof(outlet_property), "outlet.%d", index);
   snprintf(auto_outlet_property, sizeof(auto_outlet_property),
            "autoOutlet.%d.lastTimeTurnOn", index);
-  JSON_Value* root_value = json_value_init_object();
-  JSON_Object* root_object = json_value_get_object(root_value);
+  JSON_Value *root_value = json_value_init_object();
+  JSON_Object *root_object = json_value_get_object(root_value);
   bool state = outlet_get_outlet(index);
   (void)json_object_dotset_boolean(root_object, outlet_property, state);
   if (state && outlet_get_is_timer_on(index)) {
@@ -282,7 +253,8 @@ void run_auto_outlet(void) {
     time_t timer_interval = outlet_get_timer_interval(i);
     time_t on_off_interval = outlet_get_on_off_interval(i);
     time_t now = time(NULL);
-    if (!is_timer_on) continue;
+    if (!is_timer_on)
+      continue;
 
     // Auto turn off
     if (outlet_state && now - last_time_turn_on >= on_off_interval) {
