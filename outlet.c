@@ -193,18 +193,23 @@ void outlet_parse_from_json(const char *json, DEVICE_TWIN_STATE update_state) {
     if (json_object_get_value(json_auto_outlet, "timer") != NULL) {
       bool is_timer_on = json_object_get_boolean(json_auto_outlet, "timer");
       outlet_set_is_timer_on(i, is_timer_on);
+      outlet_add_message_boolean(i, "timer", outlet_get_is_timer_on(i));
     }
 
     if (json_object_get_value(json_auto_outlet, "timerInterval") != NULL) {
       time_t timer_interval =
           json_object_get_number(json_auto_outlet, "timerInterval");
       outlet_set_timer_interval(i, timer_interval);
+      outlet_add_message_number(i, "timerInterval",
+                                outlet_get_timer_interval(i));
     }
 
     if (json_object_get_value(json_auto_outlet, "onOffInterval") != NULL) {
       time_t on_off_interval =
           json_object_get_number(json_auto_outlet, "onOffInterval");
       outlet_set_on_off_interval(i, on_off_interval);
+      outlet_add_message_number(i, "onOffInterval",
+                                outlet_get_on_off_interval(i));
     }
 
     if (update_state == UPDATE_COMPLETE) {
@@ -219,17 +224,35 @@ void outlet_parse_from_json(const char *json, DEVICE_TWIN_STATE update_state) {
 
   json_value_free(root_value);
 }
-void outlet_add_message(int outlet_index) {
+
+void outlet_add_message_boolean(int outlet_index, char *name, bool value) {
   JSON_Value *root_value = json_value_init_object();
   JSON_Object *root_object = json_value_get_object(root_value);
 
-  char number[3];
-  snprintf(number, sizeof(number), "%d", outlet_index);
-  json_object_set_string(root_object, "messageType", "outlet");
-  json_object_set_string(root_object, "sensorName", number);
-  json_object_set_string(root_object, "parentName", "outlet");
-  json_object_set_boolean(root_object, "sensorState",
-                          outlet_get_outlet(outlet_index));
+  char outlet_name[10];
+  snprintf(outlet_name, sizeof(outlet_name), "outlet-%d", outlet_index);
+  json_object_set_string(root_object, "messageType", "sensor");
+  json_object_set_string(root_object, "sensorName", outlet_name);
+  json_object_set_string(root_object, "name", name);
+  json_object_set_boolean(root_object, "value", value);
+
+  char *result = json_serialize_to_string(root_value);
+  queue_message_add_message(result);
+
+  json_value_free(root_value);
+  free(result);
+}
+
+void outlet_add_message_number(int outlet_index, char *name, double value) {
+  JSON_Value *root_value = json_value_init_object();
+  JSON_Object *root_object = json_value_get_object(root_value);
+
+  char outlet_name[10];
+  snprintf(outlet_name, sizeof(outlet_name), "outlet-%d", outlet_index);
+  json_object_set_string(root_object, "messageType", "sensor");
+  json_object_set_string(root_object, "sensorName", outlet_name);
+  json_object_set_string(root_object, "name", name);
+  json_object_set_number(root_object, "value", value);
 
   char *result = json_serialize_to_string(root_value);
   queue_message_add_message(result);
@@ -260,6 +283,8 @@ char *make_outlet_report(int index) {
   if (state && outlet_get_is_timer_on(index)) {
     (void)json_object_dotset_number(root_object, last_time_turn_on,
                                     outlet_get_last_time_turn_on(index));
+    outlet_add_message_number(index, "lastTimeTurnOn",
+                              outlet_get_last_time_turn_on(index));
   }
 
   result = json_serialize_to_string(root_value);

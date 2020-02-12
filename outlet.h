@@ -33,17 +33,27 @@ typedef struct OUTLET_TAG {
 } Outlet;
 
 esp_err_t outlet_init(gpio_num_t gpios[], size_t num);
+
 esp_err_t outlet_set_outlet(int index, bool is_on);
+
 bool outlet_get_outlet(int index);
+
 bool outlet_get_is_state_changed(int index);
+
 esp_err_t outlet_set_is_state_changed(int index, bool is_state_changed);
+
 void outlet_parse_from_json(const char *json, DEVICE_TWIN_STATE update_state);
 
-void outlet_add_message(int outlet_index);
+void outlet_add_message_boolean(int outlet_index, char *name, bool value);
+
+void outlet_add_message_number(int outlet_index, char *name, double value);
+
 char *outlet_get_message(void);
+
 char *make_outlet_report(int index);
 
 void run_auto_outlet(void);
+
 #ifdef __cplusplus
 }
 #endif
