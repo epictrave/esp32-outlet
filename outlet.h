@@ -30,26 +30,37 @@ typedef struct OUTLET_TAG {
   time_t last_time_turn_on;
   time_t timer_interval;
   time_t on_off_interval;
+  char *control_deivce_id[20];
 } Outlet;
 
 esp_err_t outlet_init(gpio_num_t gpios[], size_t num);
 
 esp_err_t outlet_set_outlet(int index, bool is_on);
-
 bool outlet_get_outlet(int index);
 
 bool outlet_get_is_state_changed(int index);
-
 esp_err_t outlet_set_is_state_changed(int index, bool is_state_changed);
 
+bool outlet_get_is_timer_on(int index);
+esp_err_t outlet_set_is_timer_on(int index, bool is_timer_on);
+
+time_t outlet_get_last_time_turn_on(int index);
+esp_err_t outlet_set_last_time_turn_on(int index, time_t last_time_turn_on);
+
+time_t outlet_get_timer_interval(int index);
+esp_err_t outlet_set_timer_interval(int index, time_t timer_interval);
+
+time_t outlet_get_on_off_interval(int index);
+esp_err_t outlet_set_on_off_interval(int index, time_t on_off_interval);
+
+char *outlet_get_control_device_id(int index);
+esp_err_t outlet_set_control_device_id(int index,
+                                       const char *control_deivce_id);
+
 void outlet_parse_from_json(const char *json, DEVICE_TWIN_STATE update_state);
-
 void outlet_add_message_boolean(int outlet_index, char *name, bool value);
-
 void outlet_add_message_number(int outlet_index, char *name, double value);
-
-char *outlet_get_message(void);
-
+void outlet_add_message_string(int outlet_index, char *name, char *value);
 char *make_outlet_report(int index);
 
 void run_auto_outlet(void);
