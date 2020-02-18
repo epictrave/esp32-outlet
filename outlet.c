@@ -12,7 +12,7 @@ static const char *TAG = "outlet";
 static Outlet *outlets = NULL;
 static size_t outlet_num = 0;
 
-esp_err_t outlet_init(gpio_num_t gpios[], size_t num) {
+esp_err_t outlet_init(gpio_num_t gpios[], int num) {
   if (num <= 0)
     return ESP_ERR_INVALID_SIZE;
 
@@ -217,6 +217,7 @@ void outlet_parse_from_json(const char *json, DEVICE_TWIN_STATE update_state) {
         json_object_dotget_value(json_outlet, "power") != NULL) {
       bool state = (bool)json_object_get_boolean(json_outlet, "power");
       outlet_set_outlet(i, state);
+      outlet_add_message_boolean(i, "power", outlet_get_outlet(i));
     }
 
     if (json_object_get_value(json_outlet, "timer") != NULL) {

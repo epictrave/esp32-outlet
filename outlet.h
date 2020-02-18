@@ -33,7 +33,7 @@ typedef struct OUTLET_TAG {
   char *control_deivce_id[20];
 } Outlet;
 
-esp_err_t outlet_init(gpio_num_t gpios[], size_t num);
+esp_err_t outlet_init(gpio_num_t gpios[], int num);
 
 esp_err_t outlet_set_outlet(int index, bool is_on);
 bool outlet_get_outlet(int index);
@@ -62,7 +62,6 @@ void outlet_add_message_boolean(int outlet_index, char *name, bool value);
 void outlet_add_message_number(int outlet_index, char *name, double value);
 void outlet_add_message_string(int outlet_index, char *name, char *value);
 char *make_outlet_report(int index);
-
 void run_auto_outlet(void);
 
 #ifdef __cplusplus
