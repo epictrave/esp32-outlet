@@ -215,13 +215,15 @@ void outlet_parse_from_json(const char *json, DEVICE_TWIN_STATE update_state) {
 
     if (update_state == UPDATE_PARTIAL &&
         json_object_dotget_value(json_outlet, "power") != NULL) {
-      bool state = (bool)json_object_get_boolean(json_outlet, "power");
+      bool state =
+          json_object_get_boolean(json_outlet, "power") > 0 ? true : false;
       outlet_set_outlet(i, state);
       outlet_add_message_boolean(i, "power", outlet_get_outlet(i));
     }
 
     if (json_object_get_value(json_outlet, "timer") != NULL) {
-      bool is_timer_on = json_object_get_boolean(json_outlet, "timer");
+      bool is_timer_on =
+          json_object_get_boolean(json_outlet, "timer") > 0 ? true : false;
       outlet_set_is_timer_on(i, is_timer_on);
       outlet_add_message_boolean(i, "timer", outlet_get_is_timer_on(i));
     }
