@@ -23,6 +23,16 @@ extern "C" {
 #include "parson.h"
 #include "queue_message.h"
 
+#ifndef OUTLET_ON
+#define OUTLET_ON 1
+#endif
+
+#ifndef OUTLET_OFF
+#define OUTLET_OFF 0
+#endif
+
+#define TIME_MAX 2147483647
+
 typedef struct OUTLET_TAG {
   gpio_num_t pin;
   bool is_state_changed;
@@ -61,6 +71,8 @@ void outlet_parse_from_json(const char *json, DEVICE_TWIN_STATE update_state);
 void outlet_add_message_boolean(int outlet_index, char *name, bool value);
 void outlet_add_message_number(int outlet_index, char *name, double value);
 void outlet_add_message_string(int outlet_index, char *name, char *value);
+void outlet_add_remote_control_message(char *outlet_device_id,
+                                       char *outlet_name, bool power);
 char *make_outlet_report(int index);
 void run_auto_outlet(void);
 

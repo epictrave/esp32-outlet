@@ -4,10 +4,6 @@
 
 #include "outlet.h"
 
-#define OUTLET_ON 1
-#define OUTLET_OFF 0
-
-#define TIME_MAX 2147483647
 static const char *TAG = "outlet";
 static Outlet *outlets = NULL;
 static size_t outlet_num = 0;
@@ -271,6 +267,7 @@ void outlet_add_message_boolean(int outlet_index, char *name, bool value) {
   char outlet_name[10];
   snprintf(outlet_name, sizeof(outlet_name), "outlet-%d", outlet_index);
   json_object_set_string(root_object, "messageType", "sensor");
+  json_object_set_string(root_object, "type", "outlet");
   json_object_set_string(root_object, "sensorName", outlet_name);
   json_object_set_string(root_object, "name", name);
   json_object_set_boolean(root_object, "value", value);
@@ -289,6 +286,7 @@ void outlet_add_message_number(int outlet_index, char *name, double value) {
   char outlet_name[10];
   snprintf(outlet_name, sizeof(outlet_name), "outlet-%d", outlet_index);
   json_object_set_string(root_object, "messageType", "sensor");
+  json_object_set_string(root_object, "type", "outlet");
   json_object_set_string(root_object, "sensorName", outlet_name);
   json_object_set_string(root_object, "name", name);
   json_object_set_number(root_object, "value", value);
@@ -307,9 +305,33 @@ void outlet_add_message_string(int outlet_index, char *name, char *value) {
   char outlet_name[10];
   snprintf(outlet_name, sizeof(outlet_name), "outlet-%d", outlet_index);
   json_object_set_string(root_object, "messageType", "sensor");
+  json_object_set_string(root_object, "type", "outlet");
   json_object_set_string(root_object, "sensorName", outlet_name);
   json_object_set_string(root_object, "name", name);
   json_object_set_string(root_object, "value", value);
+
+  char *result = json_serialize_to_string(root_value);
+  queue_message_add_message(result);
+
+  json_value_free(root_value);
+  free(result);
+}
+
+void outlet_add_remote_control_message(char *outlet_device_id,
+                                       char *outlet_name, bool power) {
+  if (strcmp(outlet_device_id, "") == 0 || strcmp(outlet_name, "") == 0) {
+    ESP_LOGE(TAG, "Name is null.");
+    return;
+  }
+
+  JSON_Value *root_value = json_value_init_object();
+  JSON_Object *root_object = json_value_get_object(root_value);
+
+  json_object_set_string(root_object, "messageType", "control");
+  json_object_set_string(root_object, "type", "outlet");
+  json_object_set_string(root_object, "sensorName", outlet_name);
+  json_object_set_string(root_object, "outletDeviceID", outlet_device_id);
+  json_object_set_boolean(root_object, "power", power);
 
   char *result = json_serialize_to_string(root_value);
   queue_message_add_message(result);
